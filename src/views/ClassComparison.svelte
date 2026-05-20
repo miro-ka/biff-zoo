@@ -29,7 +29,10 @@
   </InfoBanner>
   <div class="grid">
     <section>
-      <div class="lbl">Class 1 — Morris–Lecar (SNIC regime)</div>
+      <div class="header">
+        <div class="lbl">Class 1 — Morris–Lecar (SNIC regime)</div>
+        <div class="kinetics">V₃ = 12   V₄ = 17.4   φ = 0.067</div>
+      </div>
       <div class="phase-frame">
         <PhasePortrait model={class1Model} params={params1} />
       </div>
@@ -49,7 +52,10 @@
     </section>
 
     <section>
-      <div class="lbl">Class 2 — Morris–Lecar (Hopf regime)</div>
+      <div class="header">
+        <div class="lbl">Class 2 — Morris–Lecar (Hopf regime)</div>
+        <div class="kinetics">V₃ = 2   V₄ = 30   φ = 0.04</div>
+      </div>
       <div class="phase-frame">
         <PhasePortrait model={class2Model} params={params2} />
       </div>
@@ -103,9 +109,15 @@
     aspect-ratio: 1 / 1;
     max-height: 60vh;
   }
+  .header { display: flex; flex-direction: column; gap: 2px; }
   .lbl {
     color: var(--accent);
     font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .kinetics {
+    color: var(--text-dim);
+    font-size: 11.5px;
     font-family: ui-monospace, monospace;
   }
   .control {
