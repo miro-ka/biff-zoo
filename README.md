@@ -1,5 +1,7 @@
 # Biff Zoo
 
+**Live:** <https://miro-ka.github.io/biff-zoo/>
+
 An interactive companion to Izhikevich (2000), *Neural Excitability, Spiking and Bursting*. Phase portraits, nullclines, equilibrium classification, F–I curves, and fast-slow dissections of canonical bursters — all computed live in the browser.
 
 ```bash
