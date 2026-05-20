@@ -1,6 +1,6 @@
 import type { Model2D } from '../types';
 
-function mlc(V3: number, V4: number, phi: number) {
+export function mlc(V3: number, V4: number, phi: number) {
   return (V: number, n: number, p: Record<string, number>) => {
     const mInf = 0.5 * (1 + Math.tanh((V - p.V1) / p.V2));
     const nInf = 0.5 * (1 + Math.tanh((V - V3) / V4));

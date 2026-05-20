@@ -3,11 +3,12 @@
   import CycleBifurcations from './views/CycleBifurcations.svelte';
   import ClassComparison from './views/ClassComparison.svelte';
   import Bursters from './views/Bursters.svelte';
+  import BifManifold from './views/BifManifold.svelte';
   import About from './lib/About.svelte';
   import { site } from './config';
   import { theme, toggleTheme, applyInitialTheme } from './lib/theme.svelte';
 
-  let view = $state<'doors' | 'cycles' | 'class' | 'bursters'>('doors');
+  let view = $state<'doors' | 'cycles' | 'class' | 'bursters' | 'manifold'>('doors');
   let aboutOpen = $state(false);
 
   $effect(() => { applyInitialTheme(); });
@@ -33,6 +34,9 @@
       <button class:active={view === 'bursters'} onclick={() => (view = 'bursters')}>
         Bursters
       </button>
+      <button class:active={view === 'manifold'} onclick={() => (view = 'manifold')}>
+        Param map
+      </button>
       <button class="theme-toggle" onclick={toggleTheme} aria-label="toggle theme" title="toggle theme">
         {theme.name === 'dark' ? '☀' : '☾'}
       </button>
@@ -49,8 +53,10 @@
       <CycleBifurcations />
     {:else if view === 'class'}
       <ClassComparison />
-    {:else}
+    {:else if view === 'bursters'}
       <Bursters />
+    {:else}
+      <BifManifold />
     {/if}
   </main>
 
