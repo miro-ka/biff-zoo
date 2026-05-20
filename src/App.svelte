@@ -153,6 +153,24 @@
   }
   :global(input[type='range']:focus) { outline: none; }
 
+  @media (pointer: coarse) {
+    :global(input[type='range']) {
+      height: 32px;
+      touch-action: pan-y;
+    }
+    :global(input[type='range']::-webkit-slider-runnable-track) { height: 4px; }
+    :global(input[type='range']::-webkit-slider-thumb) {
+      width: 22px;
+      height: 22px;
+      margin-top: -9px;
+    }
+    :global(input[type='range']::-moz-range-track) { height: 4px; }
+    :global(input[type='range']::-moz-range-thumb) {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
   .app {
     min-height: 100vh;
     display: flex;
