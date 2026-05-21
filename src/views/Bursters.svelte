@@ -28,7 +28,6 @@
 
   let simEpoch = $state(0);
   let sim = $state<BursterSim>(new BursterSim(bursters[0], { ...bursters[0].defaultParams }));
-  sim.prefill();
 
   $effect(() => {
     burster.id; simEpoch;
@@ -102,7 +101,7 @@
         </div>
       </button>
     {/each}
-    <div class="upcoming">covering 3 of Izhikevich's 6 classical bursters — fold/fold-cycle, triangular, …</div>
+    <div class="upcoming">3 of Izhikevich's 6 classical bursters: square-wave, elliptic, parabolic.</div>
   </div>
 
   <div class="grid">

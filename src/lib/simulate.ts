@@ -57,30 +57,6 @@ export function spikeTimes(trace: Trace, threshold: number): number[] {
   return ts;
 }
 
-export function firingFrequency(
-  model: Model2D,
-  params: Params,
-  transientMs = 800,
-  measureMs = 1200,
-): number {
-  const threshold = model.spikeThreshold ?? 0;
-  const total = transientMs + measureMs;
-  const trace = simulate(model, params, total);
-  const cutIdx = Math.floor(transientMs / model.dt);
-  const tail: Trace = {
-    t: trace.t.slice(cutIdx),
-    x: trace.x.slice(cutIdx),
-    y: trace.y.slice(cutIdx),
-  };
-  const spikes = spikeTimes(tail, threshold);
-  if (spikes.length < 2) return 0;
-  const isis: number[] = [];
-  for (let i = 1; i < spikes.length; i++) isis.push(spikes[i] - spikes[i - 1]);
-  isis.sort((a, b) => a - b);
-  const median = isis[Math.floor(isis.length / 2)];
-  return median > 0 ? 1000 / median : 0; // Hz if t is in ms
-}
-
 export function fiCurve(
   model: Model2D,
   baseParams: Params,

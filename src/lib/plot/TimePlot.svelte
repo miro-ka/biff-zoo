@@ -117,7 +117,8 @@
       ctx.fillStyle = c.axisLabel;
       ctx.font = '11px ui-monospace, monospace';
       ctx.fillText(model.labels.x, 6, 14);
-      ctx.fillText(`${windowMs} ms`, width - 60, height - 6);
+      const tUnit = model.freqUnit === '1/T' ? 't.u.' : 'ms';
+      ctx.fillText(`${windowMs} ${tUnit}`, width - 60, height - 6);
 
       ctx.restore();
       raf = requestAnimationFrame(draw);
