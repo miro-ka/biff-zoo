@@ -20,6 +20,12 @@
       <span class="logo">⌬</span>
       <span class="title">Biff Zoo</span>
       <span class="tag">a bifurcation explorer</span>
+      <a class="repo" href={site.github} target="_blank" rel="noreferrer" aria-label="source on GitHub">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span class="repo-text">miro-ka/biff-zoo</span>
+      </a>
     </div>
     <nav>
       <button class:active={view === 'doors'} onclick={() => (view = 'doors')}>
@@ -63,9 +69,20 @@
   <footer>
     <span class="cite">After Izhikevich (2000) <i>Int. J. Bifurc. Chaos</i> 10:1171–1266.</span>
     <span class="links">
-      <a href={site.github} target="_blank" rel="noreferrer">source</a>
+      <a class="iconlink" href={site.github} target="_blank" rel="noreferrer" aria-label="source on GitHub">
+        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span>source</span>
+      </a>
       <span class="sep">·</span>
-      <a href={site.kofi} target="_blank" rel="noreferrer">support</a>
+      <a class="iconlink" href={site.kofi} target="_blank" rel="noreferrer" aria-label="support on Ko-fi">
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+          <path fill="currentColor" d="M2 6h9v4a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V6zm9 1v2h.5a1 1 0 0 0 0-2H11z"/>
+          <path stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" d="M5 2c0 .8-.7.7-.7 1.5s.7.7.7 1.5M8 2c0 .8-.7.7-.7 1.5s.7.7.7 1.5"/>
+        </svg>
+        <span>support</span>
+      </a>
       <span class="sep">·</span>
       <button class="link-btn" onclick={() => (aboutOpen = true)}>about</button>
     </span>
@@ -192,9 +209,30 @@
   }
   .brand {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
   }
+  .repo {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font: 10.5px ui-monospace, monospace;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-left: 4px;
+    line-height: 1;
+  }
+  .repo svg { display: block; }
+  .repo:hover { color: var(--accent); border-color: var(--accent); }
+  .iconlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .iconlink svg { display: block; }
   .logo {
     font-size: 18px;
     color: var(--accent);
@@ -273,4 +311,26 @@
   }
   footer a:hover, footer .link-btn:hover { color: var(--accent); }
   footer .sep { color: var(--border); }
+
+  @media (max-width: 720px) {
+    .top {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+    .brand { justify-content: center; }
+    .tag { display: none; }
+    .repo .repo-text { display: none; }
+    .repo { padding: 4px 6px; }
+    nav {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+    }
+    nav button {
+      font-size: 11.5px;
+      padding: 4px 9px;
+    }
+  }
 </style>

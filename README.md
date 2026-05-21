@@ -1,6 +1,6 @@
 # Biff Zoo
 
-**Live:** <https://miro-ka.github.io/biff-zoo/>
+**Live:** <https://miro-ka.github.io/biff-zoo/> · ☕ [Support on Ko-fi](https://ko-fi.com/miropfish)
 
 An interactive companion to Izhikevich (2000), *Neural Excitability, Spiking and Bursting*. Phase portraits, nullclines, equilibrium classification, F–I curves, and fast-slow dissections of canonical bursters — all computed live in the browser.
 
@@ -16,4 +16,4 @@ Scientific content after Izhikevich, E. M. (2000). *Neural Excitability, Spiking
 
 ## License
 
-Code is MIT-licensed (see [LICENSE](LICENSE)). The scientific models, equations, and classifications are published results of their respective authors, cited above.
+Code is licensed under the GNU Affero General Public License v3.0 (see [LICENSE](LICENSE)). Forks and modified deployments must remain open-source under the same terms. The scientific models, equations, and classifications are published results of their respective authors, cited above.
