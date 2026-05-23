@@ -6,6 +6,10 @@
   import FICurve from '../lib/plot/FICurve.svelte';
   import Equation from '../lib/plot/Equation.svelte';
   import InfoBanner from '../lib/InfoBanner.svelte';
+  import Manifold3D from '../lib/plot/Manifold3D.svelte';
+  import { computeManifold, type ManifoldData3D } from '../lib/manifold3d';
+  import { rk4Step } from '../lib/integrate';
+  import ViewToggle from '../lib/ViewToggle.svelte';
 
   let activeIdx = $state(1);
   const model = $derived<Model2D>(fourDoors[activeIdx]);
@@ -26,6 +30,98 @@
   function setBif(v: number) {
     bifValues = { ...bifValues, [model.id]: v };
   }
+
+  let view3D = $state(false);
+  let manifold3d = $state<ManifoldData3D | null>(null);
+  let computing3d = $state(false);
+
+  const TRAIL_SIZE = 800;
+  const trailParam = new Float32Array(TRAIL_SIZE);
+  const trailX = new Float32Array(TRAIL_SIZE);
+  const trailY = new Float32Array(TRAIL_SIZE);
+  let trailHead = 0;
+  let trailCount = 0;
+  let liveTick = $state(0);
+
+  $effect(() => {
+    if (!view3D) return;
+    const m = model;
+    const initialP = { ...m.defaultParams, [m.bifParam.name]: bifValues[m.id] };
+    let x = m.initial[0];
+    let y = m.initial[1];
+    const settle = Math.floor(200 / m.dt);
+    for (let i = 0; i < settle; i++) {
+      [x, y] = rk4Step(m.rhs, x, y, initialP, m.dt);
+    }
+    trailHead = 0;
+    trailCount = 0;
+    const stepsPerFrame = Math.max(1, Math.floor(8 / m.dt));
+    let raf = 0;
+    const tick = () => {
+      const curP = bifValues[m.id];
+      const curParams = { ...m.defaultParams, [m.bifParam.name]: curP };
+      for (let i = 0; i < stepsPerFrame; i++) {
+        [x, y] = rk4Step(m.rhs, x, y, curParams, m.dt);
+        trailParam[trailHead] = curP;
+        trailX[trailHead] = x;
+        trailY[trailHead] = y;
+        trailHead = (trailHead + 1) % TRAIL_SIZE;
+        if (trailCount < TRAIL_SIZE) trailCount++;
+      }
+      liveTick++;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  });
+
+  const liveTrail = $derived({
+    getPoints: (): Array<[number, number, number]> => {
+      void liveTick;
+      const n = trailCount;
+      if (n === 0) return [];
+      const start = n < TRAIL_SIZE ? 0 : trailHead;
+      const pts: Array<[number, number, number]> = [];
+      const stride = 3;
+      for (let i = 0; i < n; i += stride) {
+        const idx = (start + i) % TRAIL_SIZE;
+        pts.push([trailParam[idx], trailX[idx], trailY[idx]]);
+      }
+      return pts;
+    },
+  });
+
+  $effect(() => {
+    if (!view3D) return;
+    const m = model;
+    let cancelled = false;
+    computing3d = true;
+    manifold3d = null;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const bifName = m.bifParam.name;
+      manifold3d = computeManifold(
+        (p) => (x, y, ps) => m.rhs(x, y, { ...ps, [bifName]: p }),
+        { ...m.defaultParams },
+        { min: m.bifParam.min, max: m.bifParam.max },
+        m.bounds,
+        {
+          nSamples: 40,
+          cycleSamples: 50,
+          seed: [
+            m.bounds.xMax - (m.bounds.xMax - m.bounds.xMin) * 0.1,
+            (m.bounds.yMin + m.bounds.yMax) / 2,
+          ],
+          dt: m.dt,
+          transientSteps: 3000,
+          cycleSteps: 3000,
+          cycleMinAmplitudeFrac: 0.1,
+        },
+      );
+      computing3d = false;
+    });
+    return () => { cancelled = true; };
+  });
 </script>
 
 <div class="four-doors">
@@ -60,8 +156,26 @@
 
   <div class="grid">
     <div class="phase-col">
+      <div class="plot-header">
+        <div class="plot-label">{view3D ? 'Bifurcation manifold' : 'Phase portrait'}</div>
+        <ViewToggle value={view3D} onChange={(v) => (view3D = v)} />
+      </div>
       <div class="phase-frame">
-        <PhasePortrait {model} {params} />
+        {#if view3D}
+          <Manifold3D
+            data={manifold3d}
+            pLabel={model.bifParam.name}
+            xLabel={model.labels.x}
+            yLabel={model.labels.y}
+            highlightP={bifValues[model.id]}
+            live={liveTrail}
+          />
+          {#if computing3d}
+            <div class="compute-tag">computing…</div>
+          {/if}
+        {:else}
+          <PhasePortrait {model} {params} />
+        {/if}
       </div>
     </div>
 
@@ -183,6 +297,31 @@
     width: 100%;
     aspect-ratio: 1 / 1;
     max-height: calc(100vh - 140px);
+    position: relative;
+  }
+  .plot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .plot-label {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    font-family: ui-monospace, monospace;
+  }
+  .compute-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font: 10px ui-monospace, monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
+    z-index: 5;
   }
   @media (max-width: 1000px) {
     .grid {

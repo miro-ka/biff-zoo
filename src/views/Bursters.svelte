@@ -2,9 +2,13 @@
   import { bursters, driveControls } from '../lib/models/bursters';
   import { BursterSim } from '../lib/burster-sim';
   import DissectionPlot from '../lib/plot/DissectionPlot.svelte';
+  import Manifold3D from '../lib/plot/Manifold3D.svelte';
+  import { bursterManifold3D } from '../lib/dissect3d';
+  import type { ManifoldData3D } from '../lib/manifold3d';
   import BurstTrace from '../lib/plot/BurstTrace.svelte';
   import Equation from '../lib/plot/Equation.svelte';
   import InfoBanner from '../lib/InfoBanner.svelte';
+  import ViewToggle from '../lib/ViewToggle.svelte';
 
   let activeIdx = $state(0);
   const burster = $derived(bursters[activeIdx]);
@@ -61,6 +65,52 @@
   }
 
   let showEquations = $state(false);
+
+  let view3D = $state(false);
+  let manifold3d = $state<ManifoldData3D | null>(null);
+  let computing3d = $state(false);
+
+  const otherVarIdx = $derived(
+    [0, 1, 2].find((i) => i !== burster.slowVarIdx && i !== burster.spikeVarIdx)! as 0 | 1 | 2,
+  );
+
+  $effect(() => {
+    if (!view3D) return;
+    const b = burster;
+    const p = params;
+    let cancelled = false;
+    computing3d = true;
+    // Debounce so dragging sliders doesn't trigger a full re-dissect every frame.
+    const handle = setTimeout(() => {
+      if (cancelled) return;
+      manifold3d = bursterManifold3D(b, { ...b.defaultParams, ...p });
+      computing3d = false;
+    }, 250);
+    return () => { cancelled = true; clearTimeout(handle); };
+  });
+
+  const liveTrail = $derived({
+    getPoints: (): Array<[number, number, number]> => {
+      const buf = sim.buf;
+      const n = buf.count;
+      if (n === 0) return [];
+      const keys = ['x', 'y', 'z'] as const;
+      const slowArr = buf[keys[burster.slowVarIdx]];
+      const spikeArr = buf[keys[burster.spikeVarIdx]];
+      const otherArr = buf[keys[otherVarIdx]];
+      const start = n < buf.size ? 0 : buf.head;
+      const tEnd = buf.t[(buf.head - 1 + buf.size) % buf.size];
+      const tCut = tEnd - 1200;
+      const pts: Array<[number, number, number]> = [];
+      const stride = 6;
+      for (let i = 0; i < n; i += stride) {
+        const idx = (start + i) % buf.size;
+        if (buf.t[idx] < tCut) continue;
+        pts.push([slowArr[idx], otherArr[idx], spikeArr[idx]]);
+      }
+      return pts;
+    },
+  });
 </script>
 
 <div class="bursters">
@@ -106,9 +156,26 @@
 
   <div class="grid">
     <div class="left">
-      <div class="plot-label">Fast-slow dissection — fast subsystem bifurcations vs slow variable</div>
+      <div class="plot-header">
+        <div class="plot-label">Fast-slow dissection — fast subsystem bifurcations vs slow variable</div>
+        <ViewToggle value={view3D} onChange={(v) => (view3D = v)} />
+      </div>
       <div class="dissect-frame">
-        <DissectionPlot {burster} {params} {sim} />
+        {#if view3D}
+          {@const keys = ['x', 'y', 'z'] as const}
+          <Manifold3D
+            data={manifold3d}
+            pLabel={burster.labels[keys[burster.slowVarIdx]]}
+            yLabel={burster.labels[keys[burster.spikeVarIdx]]}
+            xLabel={burster.labels[keys[otherVarIdx]]}
+            live={liveTrail}
+          />
+          {#if computing3d}
+            <div class="compute-tag">computing…</div>
+          {/if}
+        {:else}
+          <DissectionPlot {burster} {params} {sim} />
+        {/if}
       </div>
     </div>
 
@@ -222,6 +289,24 @@
     width: 100%;
     aspect-ratio: 1.25 / 1;
     max-height: calc(100vh - 240px);
+    position: relative;
+  }
+  .plot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .compute-tag {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font: 10px ui-monospace, monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
   }
   .plot-label {
     font-size: 10.5px;
